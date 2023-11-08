@@ -1,12 +1,15 @@
 use std::{
     collections::{HashMap, HashSet},
     io::stdin,
-    sync::{Mutex, Once},
+    sync::Mutex,
 };
 
 use once_cell::sync::OnceCell;
 
-const SHENG_MU:[&str;23]=["b","p","m","f","d","t","n","l","g","k","h","j","q","x","zh","ch","sh","z","c","s","y","w","r"];
+const SHENG_MU: [&str; 23] = [
+    "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", "j", "q", "x", "zh", "ch", "sh", "z",
+    "c", "s", "y", "w", "r",
+];
 
 fn get_dataset() -> &'static Mutex<HashMap<(usize, String), HashSet<String>>> {
     static INSTANCE: OnceCell<Mutex<HashMap<(usize, String), HashSet<String>>>> = OnceCell::new();
@@ -32,19 +35,21 @@ fn get_dataset() -> &'static Mutex<HashMap<(usize, String), HashSet<String>>> {
     })
 }
 
+fn divide_pinyin(x: &str) -> (&str, Option<&str>) {
+    let sheng = SHENG_MU.iter().filter(|a| x.starts_with(*a)).next();
+    match sheng {
+        Some(sheng) => (sheng, Some(&x[sheng.len()..])),
+        None => (x, None),
+    }
+}
+
 fn get_likely_candidates(pos: i32, chr: &str) -> HashSet<String> {
     let mut res = HashSet::new();
     let dataset = get_dataset().lock().unwrap();
 
-    let condition1=|x:&str|{
-        x.find(chr).is_some()
-    };
-
-    let condition2=|x:&str|{
-        let sheng=SHENG_MU.iter().filter(|a|x.starts_with(*a)).next().unwrap_or_else(||&"");
-        
-        let yun=&x[sheng.len()..];
-        sheng==&chr || yun==chr
+    let condition2 = |x: &str| {
+        let (sheng, yun) = divide_pinyin(x);
+        sheng == chr || yun.is_some_and(|yun| yun == chr) || x == chr
     };
 
     for key in dataset.keys().filter(|x| condition2(&x.1)) {
@@ -89,19 +94,19 @@ fn main() {
                 }
                 "break" => {
                     break;
-                },
-                _=>{},
+                }
+                _ => {}
             }
 
             if res.len() > 10 {
                 println!("too many candidates ({}), print the random 10", res.len());
             }
-            if res.len()==0{
+            if res.len() == 0 {
                 println!("you have entered dead conditions. please try again.");
                 break;
             }
-            if res.len()==1{
-                println!("result: {}",res.iter().next().unwrap());
+            if res.len() == 1 {
+                println!("result: {}", res.iter().next().unwrap());
                 break;
             }
             for (k, v) in res.iter().enumerate() {
