@@ -6,8 +6,8 @@ use std::{
 
 use once_cell::sync::OnceCell;
 
-// let shengmu=["b","p","m","f","d","t","n","l","g","k","h","j","q","x","zh","ch","sh","z","c","s","y","w","r"];
-// let yunmu=["a","o","e","i","u","v","ai","ei", "ui" ,"ao", "ou", "iu", "ie" ,"ve", "er", "an" ,"en" ,"in", "un" ,"vn" ,"ang" ,"eng","ing","ong"
+const SHENG_MU:[&str;23]=["b","p","m","f","d","t","n","l","g","k","h","j","q","x","zh","ch","sh","z","c","s","y","w","r"];
+
 fn get_dataset() -> &'static Mutex<HashMap<(usize, String), HashSet<String>>> {
     static INSTANCE: OnceCell<Mutex<HashMap<(usize, String), HashSet<String>>>> = OnceCell::new();
     INSTANCE.get_or_init(|| {
@@ -35,7 +35,19 @@ fn get_dataset() -> &'static Mutex<HashMap<(usize, String), HashSet<String>>> {
 fn get_likely_candidates(pos: i32, chr: &str) -> HashSet<String> {
     let mut res = HashSet::new();
     let dataset = get_dataset().lock().unwrap();
-    for key in dataset.keys().filter(|x| x.1.find(chr).is_some()) {
+
+    let condition1=|x:&str|{
+        x.find(chr).is_some()
+    };
+
+    let condition2=|x:&str|{
+        let sheng=SHENG_MU.iter().filter(|a|x.starts_with(*a)).next().unwrap_or_else(||&"");
+        
+        let yun=&x[sheng.len()..];
+        sheng==&chr || yun==chr
+    };
+
+    for key in dataset.keys().filter(|x| condition2(&x.1)) {
         if pos >= 0 && key.0 != pos as usize {
             continue;
         }
@@ -51,6 +63,7 @@ fn main() {
     );
     loop {
         let mut res: HashSet<String> = HashSet::new();
+        println!("ready to filter idioms");
         loop {
             let mut inp = String::new();
             stdin().read_line(&mut inp).unwrap();
@@ -82,6 +95,14 @@ fn main() {
 
             if res.len() > 10 {
                 println!("too many candidates ({}), print the random 10", res.len());
+            }
+            if res.len()==0{
+                println!("you have entered dead conditions. please try again.");
+                break;
+            }
+            if res.len()==1{
+                println!("result: {}",res.iter().next().unwrap());
+                break;
             }
             for (k, v) in res.iter().enumerate() {
                 println!("{}", v);
