@@ -4,6 +4,7 @@ use std::{
     sync::Mutex,
 };
 
+use anyhow::{bail, Result, Ok};
 use once_cell::sync::OnceCell;
 
 const SHENG_MU: [&str; 23] = [
@@ -61,7 +62,7 @@ fn get_likely_candidates(pos: i32, chr: &str) -> HashSet<String> {
     res
 }
 
-fn main() {
+fn main() ->Result<()>{
     println!(
         "find #{} keys from dataset",
         get_dataset().lock().unwrap().len()
@@ -75,24 +76,30 @@ fn main() {
             let cmd: Vec<_> = inp.trim().split(" ").collect();
 
             match cmd[0] {
-                "locate" => {
-                    let pos = cmd[1];
-                    let chr = cmd[2];
-                    let delta = get_likely_candidates(pos.parse().unwrap(), chr);
+                "locate" | "l" => {
+                    let (pos,chr)=                    if cmd.len()==3{
+                        (cmd[1].parse().unwrap(),cmd[2])
+                    }else if cmd.len()==2{
+                        (-1,cmd[1])
+                    }else{
+                        bail!("bad format");
+                    };
+                    
+                    let delta = get_likely_candidates(pos, chr);
                     if res.is_empty() {
                         res = delta;
                     } else {
                         res = res.intersection(&delta).map(|x| x.to_owned()).collect();
                     }
                 }
-                "remove" => {
+                "remove" | "r" => {
                     let chr = cmd[1];
                     let delta = get_likely_candidates(-1, chr);
                     for i in delta {
                         res.remove(&i);
                     }
                 }
-                "break" => {
+                "break" | "b" => {
                     break;
                 }
                 _ => {}
@@ -117,4 +124,6 @@ fn main() {
             }
         }
     }
+
+    Ok(())
 }
