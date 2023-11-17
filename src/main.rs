@@ -4,7 +4,7 @@ use std::{
     sync::Mutex,
 };
 
-use anyhow::{bail, Result, Ok};
+use anyhow::{bail, Ok, Result};
 use once_cell::sync::OnceCell;
 
 const SHENG_MU: [&str; 23] = [
@@ -62,14 +62,14 @@ fn get_likely_candidates(pos: i32, chr: &str) -> HashSet<String> {
     res
 }
 
-fn main() ->Result<()>{
+fn main() -> Result<()> {
     println!(
         "find #{} keys from dataset",
         get_dataset().lock().unwrap().len()
     );
     loop {
         let mut res: HashSet<String> = HashSet::new();
-        println!("ready to filter idioms");
+        println!("ready to find idioms");
         loop {
             let mut inp = String::new();
             stdin().read_line(&mut inp).unwrap();
@@ -77,14 +77,14 @@ fn main() ->Result<()>{
 
             match cmd[0] {
                 "locate" | "l" => {
-                    let (pos,chr)=                    if cmd.len()==3{
-                        (cmd[1].parse().unwrap(),cmd[2])
-                    }else if cmd.len()==2{
-                        (-1,cmd[1])
-                    }else{
+                    let (pos, chr) = if cmd.len() == 3 {
+                        (cmd[1].parse().unwrap(), cmd[2])
+                    } else if cmd.len() == 2 {
+                        (-1, cmd[1])
+                    } else {
                         bail!("bad format");
                     };
-                    
+
                     let delta = get_likely_candidates(pos, chr);
                     if res.is_empty() {
                         res = delta;
