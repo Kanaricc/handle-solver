@@ -18,7 +18,7 @@ cargo run
 
 ## Libraries Used
 
-- [idiom-database](https://github.com/crazywhalecc/idiom-database)
+- [idiom-database](https://github.com/crazywhalecc/idiom-database): We use it as the idiom dataset.
 
 ## License
 
