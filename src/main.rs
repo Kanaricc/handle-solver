@@ -78,7 +78,7 @@ fn main() -> Result<()> {
             match cmd[0] {
                 "locate" | "l" => {
                     let (pos, chr) = if cmd.len() == 3 {
-                        (cmd[1].parse().unwrap(), cmd[2])
+                        (cmd[1].parse::<i32>().unwrap()-1, cmd[2])
                     } else if cmd.len() == 2 {
                         (-1, cmd[1])
                     } else {

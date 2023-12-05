@@ -8,7 +8,7 @@ A simple solver of chinese idiom wordle game, `Handle`.
 cargo run
 ```
 
-- `l [pos] <pinyin>`: Locate `<pinyin>` at position `[pos]` (0 ~ 4).
+- `l [pos] <pinyin>`: Locate `<pinyin>` at position `[pos]` (1 ~ 4).
 - `r <pinyin>`: Remove `<pinyin>` from candidates.
 - `b`: Start a new game.
 
